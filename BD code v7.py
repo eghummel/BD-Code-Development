@@ -17,18 +17,18 @@ from scipy.integrate import cumtrapz
 
 # SETUP VARIABLES - USER INPUTS
 BD = 2 #Bluedrop file is from 
-fileNum = '0737' # write the bin file number you want to analyze (do not include 'bLog' or '.bin')
+fileNum = '0275' # write the bin file number you want to analyze (do not include 'bLog' or '.bin')
 soiltype = "s" #s = sand, c=clay, m=mixed, u=unknown
 atype = 'm'  # m = mantle area (best for sands), p = projected area (best for clays)
 tiptype = 'c'  # c = cone, p = parabolic, b = blunt
 #offset = 1 # this value is subtracted from the accelerometer readings
-droptype = 'a' #w = water, #a = air
+droptype = 'w' #w = water, #a = air
 sign = "uk" #enter an effective unit weight value in kg/m^3 or "uk" if unknown 
 # paste the filepath to the folder where the BD data is stored
-binFilepath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/14March23/BD2 3.14.23 - Drops Only")
+binFilepath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BD2 3.8.23 - Drops Only")
 #paste the filepath to an excel file that the analysis results will be printed in
-outputPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/14March23/BD2 3.14.23 - Drops Only/Analysis Figures") #  Path to pre-existing Excel File
-plotPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/14March23/BD2 3.14.23 - Drops Only/Analysis Figures")
+outputPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BlueDrop Data Processing March 8 2023.xlsx") #  Path to pre-existing Excel File
+plotPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BD2 3.8.23 - Drops Only/Analysis Figures")
 #if applicable, paste the filepath to an excel file that troubleshooting data will be printed in
 troubleshootingPath = Path("H:\My Drive\CEE 5904 - Project & Report/2021 FRF Data\Bluedrop\October/14 October 2021 AM\Troubleshooting.xlsx")
 
@@ -336,7 +336,7 @@ def qsbcfun(acc): #calculates quasi-static bearing capacity
         maxAqsbc = qsbc.max()
         maxAqsbc = round(maxAqsbc,1)
 
-def dr(acc): #Albatal 2019 method for calculating relative density (Duck, NC specific!)
+def dr(accg): #Albatal 2019 method for calculating relative density (Duck, NC specific!)
     global Dr
     maxacc = accg.max() #maximum deceleration, in g
     #print("Max deceleration = ", maxacc)
@@ -366,12 +366,12 @@ def duncan_correlation(): #duncan correlation for caluclating friction angle
     phi = round(phi, 1)
     print("phi =", phi)
 
-def firmnessfactor(acc):
+def firmnessfactor(acc, drop):
     global maxacc
     global ff
     maxacc = acc.max()
     g = 9.80665
-    tp = len(drop1)/2000
+    tp = len(drop)/2000
 
     ff = maxacc/(g*tp*maxvel)
     ff = round(ff,1)
@@ -494,8 +494,8 @@ def duck_dep_qsbc_comboplot(dropg, drop, dropt, accNameg, qdynt):
 
     if droptype == "a": #for partial saturation, only one qsbc curve
         y = dropt["Penetration Depth (m)"]*100
-        ax2.plot(qdynt[40:], y[40:], label="Qdyn") #color = "k", marker = 11 #Plots Qdyn, chops off first 40 readings
-        ax2.plot(qsbc[40:-20], y[40:-20], label="QSBC") #plots QSBC; chops off last 10 points which go off towards infinity (can adjust as needed)
+        ax2.plot(qdynt[10:], y[10:], label="Qdyn") #color = "k", marker = 11 #Plots Qdyn, chops off first 40 readings
+        ax2.plot(qsbc[10:-20], y[10:-20], label="QSBC") #plots QSBC; chops off last 10 points which go off towards infinity (can adjust as needed)
         ax2.set(xlabel="Bearing Capacity (kPa)",)
         ax2.set_xlim(0,qdyn.max())
         ax2.invert_yaxis()
@@ -505,12 +505,12 @@ def duck_dep_qsbc_comboplot(dropg, drop, dropt, accNameg, qdynt):
 
     else: #for saturated drops, use a range of strain-rate factors
         y = list(dropt["Penetration Depth (m)"]*100)
-        ax2.plot(bctablet.iloc[:-5,0], y[:-5], label=str(bctablet.columns[0])) #plots QSBC with smallest srf
-        ax2.plot(bctablet.iloc[:-15,len(bctable.columns)-1], y[:-15], label=str(bctable.columns[len(bctable.columns)-1])) #plots QSBC with largest srf
+        ax2.plot(qdynt[10:-20], y[10:-20], label="Qdyn") #color = "k", marker = 11 #Plots Qdyn
+        ax2.plot(bctablet.iloc[10:-20,0], y[10:-20], label=str(bctablet.columns[0])) #plots QSBC with smallest srf
+        ax2.plot(bctablet.iloc[10:-20,len(bctable.columns)-1], y[10:-20], label=str(bctable.columns[len(bctable.columns)-1])) #plots QSBC with largest srf
         for i in range(1,len(bctablet.columns)-1): #plots qsbc for all other srfs
-            ax2.plot(bctablet.iloc[:-15,i], y[:-15], label=str(bctablet.columns[i]), color = '.6')
+            ax2.plot(bctablet.iloc[10:-20,i], y[10:-20], label=str(bctablet.columns[i]), color = '.6')
             #bctablet.iloc[:,i].pop()
-        ax2.plot(qdynt[:], y[:], label="Qdyn") #color = "k", marker = 11 #Plots Qdyn
         ax2.set(xlabel="Bearing Capacity (kPa)")
         ax2.set_xlim(0,)
         ax2.invert_yaxis()
@@ -621,35 +621,35 @@ df.columns = ['Count', 'no clue', 'g2g', 'g18g', 'g50g', 'ppm', 'g200g', 'gX55g'
 # print(dfCal)
 
 # APPLY CALIBRATION FACTORS
-if BD == 3:  # calibration factors from July 2019
-    g2g = (df['g2g']-38285.6)/1615800.9 #- offset# accelerometers are in g
-    g18g = (df['g18g']+13738)/163516.8 #- offset
-    g50g = (df['g50g']-238520.6)/63666 #- offset
+if BD == 3:  # calibration factors from March 2023
+    g2g = (df['g2g']-33570.1)/1614577.9 #- offset# accelerometers are in g
+    g18g = (df['g18g']+13495)/163387.2 #- offset
+    g50g = (df['g50g']-238817.4)/63779.5 #- offset
     ppm = ((df['ppm']-139040.1)/20705) * 6.89475729 # converts to kPa
-    g200g = ((df['g200g'] +12142.6)/27751.9) #- offset
-    gX55g = (df['gX55g']-90237)/65351.5  
-    gY55g = (df['gY55g']-57464.2)/65545.
-    g250g = (df['g250g']-40420.3)/13636.9 #- offset
+    g200g = (df['g200g'] -262332.4)/38888.7 #- offset
+    gX55g = (df['gX55g']-70406)/59754.3
+    gY55g = (df['gY55g']-69421.1)/141871.5
+    g250g = (df['g250g']-39077.4)/13746.9 #- offset
 
-if BD == 2: # calibration factors from Aug 26, 2021
-    g2g = (df['g2g']+37242.2)/1639250.2 #- offset# accelerometers are in g
-    g18g = (df['g18g']-26867.0)/160460.5 #- offset
-    g50g = (df['g50g']-213923.3)/64080.7 #- offset
+if BD == 2: # calibration factors from March 2023
+    g2g = (df['g2g']+36597.6)/1637627.3 #- offset# accelerometers are in g
+    g18g = (df['g18g']-26185.3)/160297.2 #- offset
+    g50g = (df['g50g']-212256.9)/63968.7 #- offset
     ppm = ((df['ppm']+55518.9)/18981.7) * 6.89475729 # converts to kPa
-    g200g = (df['g200g']-171448.6)/30334.2 #- offset
-    gX55g = (df['gX55g']-54242.6)/64767.7 
-    gY55g = (df['gY55g']-40574.2)/66343.1 
-    g250g = (df['g250g']-40614.9)/13654.6 #- offset
+    g200g = (df['g200g']-175499.4)/30583.8 #- offset
+    gX55g = (df['gX55g']-53629.9)/68590.9
+    gY55g = (df['gY55g']-43694.3)/68280.3
+    g250g = (df['g250g']-39619.9)/13545.8 #- offset
 
-if BD == 1: # calibration factors from July 2020
-    g2g = (df['g2g']-42590.9)/1626361.1 #- offset # accelerometers are in g
-    g18g = (df['g18g']-44492.9)/161125.5 #- offset
-    g50g = (df['g50g']-171656.1)/64020.3 #- offset
+if BD == 1: # calibration factors from March 2023
+    g2g = (df['g2g']-43727.6)/1625064 #- offset # accelerometers are in g
+    g18g = (df['g18g']-45085.6)/160925.7 #- offset
+    g50g = (df['g50g']-173493.4)/63944.6 #- offset
     ppm = ((df['ppm']+31776.1)/20679.7) * 6.89475729 # this is kPa
-    g200g = (df['g200g'] -723404.8)/32209.7  #- offset
-    gX55g = (df['gX55g'] -54881.1)/64858.6 
-    gY55g = (df['gY55g']-28735.5)/63839.9 
-    g250g = (df['g250g']+13299.7)/13697.1 #- offset
+    g200g = (df['g200g'] -731734.3)/32192.4  #- offset
+    gX55g = (df['gX55g'] -68837.9)/52137.3
+    gY55g = (df['gY55g']-68015.9)/28074.9
+    g250g = (df['g250g']+10580)/13688.7 #- offset
 
 time = (df['Count']-df['Count'].iloc[0]+1)/2000 # gives time in s
 count = df["Count"]-df['Count'].iloc[0]
@@ -754,19 +754,21 @@ while n <= nDrops :
         drop1gt = drop1g #.truncate(before=trunc_index)
         acc1t = acc1 #.truncate(before=trunc_index)
         acc1t = np.array(acc1t)
+        acc1gt = acc1g #.truncate(before=trunc_index)
+        acc1gt = np.array(acc1gt)
         drop1t = drop1 #truncate(before=trunc_index)
         qdyn1t = qdyn1#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc1t) #calculates the firmness factor
+        firmnessfactor(acc1t, drop1) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc1t) #calculates relative density
+            dr(acc1gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc1t)
+                dr(acc1gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -842,19 +844,21 @@ while n <= nDrops :
         drop2gt = drop2g #.truncate(before=trunc_index)
         acc2t = acc2 #.truncate(before=trunc_index)
         acc2t = np.array(acc2t)
+        acc2gt = acc2g #.truncate(before=trunc_index)
+        acc2gt = np.array(acc2gt)
         drop2t = drop2 #truncate(before=trunc_index)
         qdyn2t = qdyn2#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc2t) #calculates the firmness factor
+        firmnessfactor(acc2t, drop2) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc2t) #calculates relative density
+            dr(acc2gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc2t)
+                dr(acc2gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -927,19 +931,21 @@ while n <= nDrops :
         drop3gt = drop3g #.truncate(before=trunc_index)
         acc3t = acc3 #.truncate(before=trunc_index)
         acc3t = np.array(acc3t)
+        acc3gt = acc3g #.truncate(before=trunc_index)
+        acc3gt = np.array(acc3gt)
         drop3t = drop3 #truncate(before=trunc_index)
         qdyn3t = qdyn3#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc3t) #calculates the firmness factor
+        firmnessfactor(acc3t, drop3) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc3t) #calculates relative density
+            dr(acc3gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc3t)
+                dr(acc3gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -1012,19 +1018,21 @@ while n <= nDrops :
         drop4gt = drop4g #.truncate(before=trunc_index)
         acc4t = acc4 #.truncate(before=trunc_index)
         acc4t = np.array(acc4t)
+        acc4gt = acc4g #.truncate(before=trunc_index)
+        acc4gt = np.array(acc4gt)
         drop4t = drop4 #truncate(before=trunc_index)
         qdyn4t = qdyn4#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc4t) #calculates the firmness factor
+        firmnessfactor(acc4t, drop4) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc4t) #calculates relative density
+            dr(acc4gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc4t)
+                dr(acc4gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -1097,19 +1105,21 @@ while n <= nDrops :
         drop5gt = drop5g #.truncate(before=trunc_index)
         acc5t = acc5 #.truncate(before=trunc_index)
         acc5t = np.array(acc5t)
+        acc5gt = acc5g #.truncate(before=trunc_index)
+        acc5gt = np.array(acc5gt)
         drop5t = drop5 #truncate(before=trunc_index)
         qdyn5t = qdyn5#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc5t) #calculates the firmness factor
+        firmnessfactor(acc5t, drop5) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc5t) #calculates relative density
+            dr(acc5gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc5t)
+                dr(acc5gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -1182,19 +1192,21 @@ while n <= nDrops :
         drop6gt = drop6g #.truncate(before=trunc_index)
         acc6t = acc6 #.truncate(before=trunc_index)
         acc6t = np.array(acc6t)
+        acc6gt = acc6g #.truncate(before=trunc_index)
+        acc6gt = np.array(acc6gt)
         drop6t = drop6 #truncate(before=trunc_index)
         qdyn6t = qdyn6#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc6t) #calculates the firmness factor
+        firmnessfactor(acc6t, drop6) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc6t) #calculates relative density
+            dr(acc6gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc6t)
+                dr(acc6gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -1267,19 +1279,21 @@ while n <= nDrops :
         drop7gt = drop7g #.truncate(before=trunc_index)
         acc7t = acc7 #.truncate(before=trunc_index)
         acc7t = np.array(acc7t)
+        acc7gt = acc7g #.truncate(before=trunc_index)
+        acc7gt = np.array(acc7gt)
         drop7t = drop7 #truncate(before=trunc_index)
         qdyn7t = qdyn7#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc7t) #calculates the firmness factor
+        firmnessfactor(acc7t, drop7) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc7t) #calculates relative density
+            dr(acc7gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc7t)
+                dr(acc7gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
@@ -1352,19 +1366,21 @@ while n <= nDrops :
         drop8gt = drop8g #.truncate(before=trunc_index)
         acc8t = acc8 #.truncate(before=trunc_index)
         acc8t = np.array(acc8t)
+        acc8gt = acc8g #.truncate(before=trunc_index)
+        acc8gt = np.array(acc8gt)
         drop8t = drop8 #truncate(before=trunc_index)
         qdyn8t = qdyn8#.truncate(before=trunc_index)
         if droptype == "w":
             bctablet = bctable#.truncate(before=trunc_index)
 
         #bctruncate(drop1g, drop1, acc1, qdyn1)
-        firmnessfactor(acc8t) #calculates the firmness factor
+        firmnessfactor(acc8t, drop8) #calculates the firmness factor
         if soiltype == "s":
-            dr(acc8t) #calculates relative density
+            dr(acc8gt) #calculates relative density
             duncan_correlation() #calculates friction angle
         elif soiltype == "u":
             if maxdep <= .2:
-                dr(acc8t)
+                dr(acc8gt)
                 duncan_correlation()
         pentime=(penend - penstart)/2 #ms #calculates the time of penetration
 
