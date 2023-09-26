@@ -16,19 +16,19 @@ from scipy.integrate import cumtrapz
 
 
 # SETUP VARIABLES - USER INPUTS
-BD = 2 #Bluedrop file is from 
-fileNum = '0275' # write the bin file number you want to analyze (do not include 'bLog' or '.bin')
-soiltype = "s" #s = sand, c=clay, m=mixed, u=unknown
-atype = 'm'  # m = mantle area (best for sands), p = projected area (best for clays)
+BD = 3 #Bluedrop file is from 
+fileNum = '009B' # write the bin file number you want to analyze (do not include 'bLog' or '.bin')
+soiltype = "u" #s = sand, c=clay, m=mixed, u=unknown
+atype = 'm'  # m = mantle area (best for sands), p = projected area (best for clays), b = both 
 tiptype = 'c'  # c = cone, p = parabolic, b = blunt
 #offset = 1 # this value is subtracted from the accelerometer readings
-droptype = 'w' #w = water, #a = air
+droptype = 'a' #w = water, #a = air
 sign = "uk" #enter an effective unit weight value in kg/m^3 or "uk" if unknown 
 # paste the filepath to the folder where the BD data is stored
-binFilepath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BD2 3.8.23 - Drops Only")
+binFilepath = Path("H:/.shortcut-targets-by-id/1-AJMoJ7sju0bbgBxYYfsq9uMyeECS_MX/Quinhagak June 2023/Demo data collection/PFFP/June 19, 2023/Drops Only")
 #paste the filepath to an excel file that the analysis results will be printed in
-outputPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BlueDrop Data Processing March 8 2023.xlsx") #  Path to pre-existing Excel File
-plotPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Intertidal/BlueDrop, Samples & Moisture Gage/08March23/BD2 3.8.23 - Drops Only/Analysis Figures")
+outputPath = Path("H:/.shortcut-targets-by-id/1-AJMoJ7sju0bbgBxYYfsq9uMyeECS_MX/Quinhagak June 2023/Demo data collection/PFFP/June 19, 2023/Data Analysis 6-19-23.xlsx") #  Path to pre-existing Excel File
+plotPath = Path("H:/.shortcut-targets-by-id/1-AJMoJ7sju0bbgBxYYfsq9uMyeECS_MX/Quinhagak June 2023/Demo data collection/PFFP/June 19, 2023/Analysis Figures")
 #if applicable, paste the filepath to an excel file that troubleshooting data will be printed in
 troubleshootingPath = Path("H:\My Drive\CEE 5904 - Project & Report/2021 FRF Data\Bluedrop\October/14 October 2021 AM\Troubleshooting.xlsx")
 
@@ -228,11 +228,11 @@ def areafind(): #finds the embedded area based on the penetration depth, area ty
                 if d1[k]<length:
                     r.append(.22+d1[k]*((4.375-.22)/7.55))
                     # r.append(d1[k]*np.tan(30*pi/180))
-                    a1.append(pi*r[k]**2)
+                    a1.append(pi*(r[k])**2)
                 elif d1[k]>=length:
                     r.append(4.375)
-                    if r[k-1]<r[k]:
-                        trunc_index = r.index(r[k-1])+jindex+dropstart #performs analysis only on readings beyond depth of cone height
+                    '''if r[k-1]<r[k]:
+                        trunc_index = r.index(r[k-1])+jindex+dropstart #performs analysis only on readings beyond depth of cone height'''
                     a1.append(pi*(r[k])**2)
                 a1[k] = a1[k]/10000
             area = a1
@@ -414,7 +414,7 @@ def overviewplot(): #Plot showing all accellerometers and pore pressure readings
 
     fig.subplots_adjust(bottom=.1, left = .1)
     plotName = fileNum+" Overview.png"
-    plt.savefig(plotPath / plotName)
+    #plt.savefig(plotPath / plotName)
     plt.show()
 
 def integplot(drop, accName): #Deceleration,Velocity,and penetration depth vs time plots

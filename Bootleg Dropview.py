@@ -10,14 +10,15 @@ import shutil
 
 # SETUP VARIABLES - USER INPUTS
 BD = 3 #Bluedrop file is from 
-fileNum = '01BB' # write the bin file number for the earliest drop in the folder (do not include 'bLog' or '.bin')
+fileNum = '00A0'
+# write the bin file number for the earliest drop in the folder (do not include 'bLog' or '.bin')
 numFiles = 20 #write the number of bin files in the folder of interest (if only looking at 1 drop, write 2)
 offset = 0 # this value is subtracted from the accelerometer readings
 # paste the filepath to the folder where the BD data is stored
-binFilepath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Subtidal/CRAB Survey 3.16.23/BlueDrop/BD3 3.16.23 - All Files")
+binFilepath = Path("C:/Users/elise/Desktop/Sequim_2021/")
 #paste the filepath that you want the files containing drops copied to 
-outputPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Subtidal/CRAB Survey 3.16.23/BlueDrop/BD3 3.16.23 - Drops Only")
-plotPath = Path("H:/.shortcut-targets-by-id/1aF9t2aiRGWTftJMZFAOBixqvQniFBjnb/Duck  2023/Data/Subtidal/CRAB Survey 3.16.23/BlueDrop/BD3 3.16.23 - Drops Only/Dec-Time Plots")
+outputPath = Path("C:/Users/elise/Desktop/Sequim_2021/Drops Only")
+plotPath = Path("C:/Users/elise/Desktop/Sequim_2021/Drops Only/Dec-Time Plots")
 
 def overviewplot(): #Plot showing all accelerometers and pore pressure readings
     fig, (ax1) = plt.subplots(1)
@@ -180,15 +181,15 @@ for i in range(1, numFiles):
     df.columns = ['Count', 'no clue', 'g2g', 'g18g', 'g50g', 'ppm', 'g200g', 'gX55g', 'gY55g', 'g250g'] # names columns
 
     # APPLY CALIBRATION FACTORS
-    if BD == 3:  # calibration factors from July 2019
-        g2g = (df['g2g']-38285.6)/1615800.9 - offset# accelerometers are in g
-        g18g = (df['g18g']+13738)/163516.8 - offset
-        g50g = (df['g50g']-238520.6)/63666 - offset
+    if BD == 3:  # calibration factors from March 2023
+        g2g = (df['g2g']-33570.1)/1614577.9 - offset# accelerometers are in g
+        g18g = (df['g18g']+13495)/163387.2 - offset
+        g50g = (df['g50g']-238817.4)/63779.5 - offset
         ppm = ((df['ppm']-139040.1)/20705) * 6.89475729 # converts to kPa
-        g200g = ((df['g200g'] +12142.6)/27751.9) - offset
-        gX55g = (df['gX55g']-90237)/65351.5  
-        gY55g = (df['gY55g']-57464.2)/65545.
-        g250g = (df['g250g']-40420.3)/13636.9 - offset
+        g200g = ((df['g200g'] -262332.4/38888.7)) - offset
+        gX55g = (df['gX55g']-70406)/59754.3  
+        gY55g = (df['gY55g']-69421.1)/141871.5
+        g250g = (df['g250g']-39077.4)/13746.9 - offset
 
     if BD == 2: # calibration factors from Aug 26, 2021
     
