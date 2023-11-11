@@ -10,15 +10,15 @@ import shutil
 
 # SETUP VARIABLES - USER INPUTS
 BD = 3 #Bluedrop file is from 
-fileNum = '00A0'
+fileNum = '0B32'
 # write the bin file number for the earliest drop in the folder (do not include 'bLog' or '.bin')
-numFiles = 20 #write the number of bin files in the folder of interest (if only looking at 1 drop, write 2)
+numFiles = 25 #write the number of bin files in the folder of interest (if only looking at 1 drop, write 2)
 offset = 0 # this value is subtracted from the accelerometer readings
 # paste the filepath to the folder where the BD data is stored
-binFilepath = Path("C:/Users/elise/Desktop/Sequim_2021/")
+binFilepath = Path("D:/BD3_11-6-2023")
 #paste the filepath that you want the files containing drops copied to 
-outputPath = Path("C:/Users/elise/Desktop/Sequim_2021/Drops Only")
-plotPath = Path("C:/Users/elise/Desktop/Sequim_2021/Drops Only/Dec-Time Plots")
+outputPath = Path("D:/BD3_11-6-2023/Drops_Only")
+plotPath = Path("D:/BD3_11-6-2023/Drops_Only/File_Images")
 
 def overviewplot(): #Plot showing all accelerometers and pore pressure readings
     fig, (ax1) = plt.subplots(1)
